@@ -38,7 +38,32 @@ function App() {
     setUsers([...users, createdUser]);
     setNewUser(''); 
   };
-  
+
+  const deleteUser = async (id) => {
+    await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+    setUsers(users.filter(user => user.id !== id));
+  };
+
+  // const updateUser = async () => {
+  //   const trimmedUser = editUser.task.trim();
+
+  //   if (!trimmedUser) {
+  //     alert('Updated task cannot be empty or just whitespace');
+  //     return;
+  //   }
+
+  //   const response = await fetch(`${API_URL}/${editUser.id}`, {
+  //     method: 'PUT',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify({ task: trimmedUser }),
+  //   });
+  //   const updatedUser = await response.json();
+  //   setUsers(users.map(user => (user.id === updatedUser.id ? updatedUser : user)));
+  //   setEditUser(null);
+  // };
+
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-5">
       <h1 className="text-4xl font-bold text-green-400 mb-8">User Management App</h1>
@@ -94,7 +119,7 @@ function App() {
                 )}
 
                 <button
-                  // onClick={() => deleteUser(user.id)}
+                  onClick={() => deleteUser(user.id)}
                   className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
                 >
                   <RiDeleteBinLine />
