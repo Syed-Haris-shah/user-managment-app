@@ -31,6 +31,12 @@ app.put('/users/:id', (req, res) => {
   }
 });
 
+app.delete('/users/:id', (req, res) => {
+  const { id } = req.params;
+  users = users.filter(t => t.id != id);
+  res.json({ message: 'user deleted' });
+});
+
 app.listen(PORT,()=>{
   console.log(`port in running on localhost:${PORT}`)
 })
