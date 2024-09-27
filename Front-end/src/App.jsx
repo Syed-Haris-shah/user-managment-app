@@ -44,25 +44,25 @@ function App() {
     setUsers(users.filter(user => user.id !== id));
   };
 
-  // const updateUser = async () => {
-  //   const trimmedUser = editUser.task.trim();
+  const updateUser = async () => {
+    const trimmedUser = editUser.task.trim();
 
-  //   if (!trimmedUser) {
-  //     alert('Updated task cannot be empty or just whitespace');
-  //     return;
-  //   }
+    if (!trimmedUser) {
+      alert('Updated task cannot be empty or just whitespace');
+      return;
+    }
 
-  //   const response = await fetch(`${API_URL}/${editUser.id}`, {
-  //     method: 'PUT',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify({ task: trimmedUser }),
-  //   });
-  //   const updatedUser = await response.json();
-  //   setUsers(users.map(user => (user.id === updatedUser.id ? updatedUser : user)));
-  //   setEditUser(null);
-  // };
+    const response = await fetch(`${API_URL}/${editUser.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ task: trimmedUser }),
+    });
+    const updatedUser = await response.json();
+    setUsers(users.map(user => (user.id === updatedUser.id ? updatedUser : user)));
+    setEditUser(null);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center p-5">
@@ -80,7 +80,7 @@ function App() {
           <div className='ml-3 w-1/2'>
             <button
               onClick={addUser}
-              className="bg-green-400 text-white px-6 py-2 rounded-md hover:bg-blue-600"
+              className="bg-green-400 text-white font-semibold px-6 py-2 rounded-md hover:bg-green-500"
             >
               Add User
             </button>
@@ -94,7 +94,7 @@ function App() {
                 <input
                   type="text"
                   value={editUser.task}
-                  // onChange={(e) => setEditUser({ ...editUser, task: e.target.value })}
+                  onChange={(e) => setEditUser({ ...editUser, task: e.target.value })}
                   className="w-full px-2 py-1 border rounded-md"
                 />
               ) : (
@@ -104,14 +104,14 @@ function App() {
               <div className="flex items-center space-x-2">
                 {editUser?.id === user.id ? (
                   <button
-                    // onClick={updateUser}
+                    onClick={updateUser}
                     className="bg-green-500 text-white ml-3 px-2 py-1 rounded-md hover:bg-green-600"
                   >
                     Update
                   </button>
                 ) : (
                   <button
-                    // onClick={() => setEditUser(user)}
+                    onClick={() => setEditUser(user)}
                     className="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600"
                   >
                     <MdOutlineEdit />
