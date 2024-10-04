@@ -17,6 +17,8 @@ import {
 } from "@mui/material";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 
+const URL = "http://user-managment-app-eight.vercel.app/users"
+
 const App = () => {
   const [items, setItems] = useState([]);
   const [formData, setFormData] = useState({ name: "", email: "" });
@@ -26,7 +28,7 @@ const App = () => {
 
   // Fetch items from the backend         
   const fetchItems = async () => {
-    const response = await fetch("http://localhost:3000/users");
+    const response = await fetch(URL);
     const data = await response.json();
     setItems(data);
   };
@@ -54,7 +56,7 @@ const App = () => {
     e.preventDefault();
     if (isEditing) {
       // Update existing item
-      await fetch(`http://localhost:3000/users/${currentId}`, {
+      await fetch(`${URL}/${currentId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -68,7 +70,7 @@ const App = () => {
       );
     } else {
       // Add new item
-      const response = await fetch("http://localhost:3000/users", {
+      const response = await fetch(URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -91,7 +93,7 @@ const App = () => {
 
   // Delete an item
   const handleDelete = async (id) => {
-    await fetch(`http://localhost:3000/users/${id}`, {
+    await fetch(`${URL}/${id}`, {
       method: "DELETE",
     });
     setItems((prevItems) => prevItems.filter((item) => item.id !== id));
