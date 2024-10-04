@@ -1,136 +1,183 @@
-import { useState, useEffect } from 'react';
-import { RiDeleteBinLine } from "react-icons/ri";
-import { MdOutlineEdit } from "react-icons/md";
+import React, { useState, useEffect } from "react";
+import {
+  TextField,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
+import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 
-const API_URL = 'http://localhost:3000/users';
+const App = () => {
+  const [items, setItems] = useState([]);
+  const [formData, setFormData] = useState({ name: "", email: "" });
+  const [isEditing, setIsEditing] = useState(false);
+  const [currentId, setCurrentId] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
-function App() {
-  const [users, setUsers] = useState([]);
-  const [newUser, setNewUser] = useState('');
-  const [editUser, setEditUser] = useState(null);
+  // Fetch items from the backend         
+  const fetchItems = async () => {
+    const response = await fetch("http://localhost:3000/users");
+    const data = await response.json();
+    setItems(data);
+  };
 
   useEffect(() => {
-    fetchUser();
+    fetchItems();
   }, []);
 
-   const fetchUser = async () => {
-    const response = await fetch(API_URL);
-    const data = await response.json();
-    setUsers(data);
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
   };
 
-  const addUser = async () => {
-    const trimmedUser = newUser.trim();
+  // Open dialog for add or edit
+  const handleDialogOpen = () => setDialogOpen(true);
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    setFormData({ name: "", email: "" });
+    setIsEditing(false);
+  };
 
-    if (!trimmedUser) {
-      alert('Task cannot be empty or just whitespace');
-      return;
+  // Add or update item
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (isEditing) {
+      // Update existing item
+      await fetch(`http://localhost:3000/users/${currentId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      setItems((prevItems) =>
+        prevItems.map((item) =>
+          item.id === currentId ? { ...item, ...formData } : item
+        )
+      );
+    } else {
+      // Add new item
+      const response = await fetch("http://localhost:3000/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const newItem = await response.json();
+      setItems((prevItems) => [...prevItems, newItem]);
     }
-
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ task: trimmedUser }),
-    });
-    const createdUser = await response.json();
-    setUsers([...users, createdUser]);
-    setNewUser(''); 
+    handleDialogClose();
   };
 
-  const deleteUser = async (id) => {
-    await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
-    setUsers(users.filter(user => user.id !== id));
+  // Edit an item
+  const handleEdit = (item) => {
+    setFormData({ name: item.name, email: item.email });
+    setCurrentId(item.id);
+    setIsEditing(true);
+    handleDialogOpen();
   };
 
-  const updateUser = async () => {
-    const trimmedUser = editUser.task.trim();
-
-    if (!trimmedUser) {
-      alert('Updated task cannot be empty or just whitespace');
-      return;
-    }
-
-    const response = await fetch(`${API_URL}/${editUser.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ task: trimmedUser }),
+  // Delete an item
+  const handleDelete = async (id) => {
+    await fetch(`http://localhost:3000/users/${id}`, {
+      method: "DELETE",
     });
-    const updatedUser = await response.json();
-    setUsers(users.map(user => (user.id === updatedUser.id ? updatedUser : user)));
-    setEditUser(null);
+    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col items-center p-5">
-      <h1 className="text-4xl font-bold text-green-400 mb-8">User Management App</h1>
+    <div style={{width:'50%', margin:'2rem auto'}} className="container">
+      <h1 style={{ color: "#000", textAlign: 'center', fontWeight:'bold', textTransform:'uppercase',fontSize:'2rem', marginBottom:'40px' }}>User Management App</h1>
 
-      <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6">
-        <div className="flex mb-4">
-          <input
-            type="text"
-            value={newUser}
-            onChange={(e) => setNewUser(e.target.value)} 
-            placeholder="Add User"
-            className="w-full px-3 py-1 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+      {/* Button to open dialog for adding user */}
+      <Button
+        variant="contained"
+        color="success"
+        onClick={handleDialogOpen}
+        style={{ marginBottom: "20px", fontWeight:'bold' }}
+      >
+        Add User
+      </Button>
+
+      {/* Dialog for add/edit */}
+      <Dialog open={dialogOpen} onClose={handleDialogClose}>
+        <DialogTitle>{isEditing ? "Edit User" : "Add User"}</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="Name"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            fullWidth
+            required
+            style={{ marginBottom: "10px" }}
           />
-          <div className='ml-3 w-1/2'>
-            <button
-              onClick={addUser}
-              className="bg-green-400 text-white font-semibold px-6 py-2 rounded-md hover:bg-green-500"
-            >
-              Add User
-            </button>
-          </div>
-        </div>
+          <TextField
+            label="Email"
+            name="email"
+            type="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            fullWidth
+            required
+            style={{ marginBottom: "10px" }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDialogClose} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} color="primary">
+            {isEditing ? "Update" : "Add"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-        <ul className="space-y-3">
-          {users.map((user) => (
-            <li key={user.id} className="flex justify-between items-center bg-gray-50 p-3 rounded-md shadow-sm">
-              {editUser?.id === user.id ? (
-                <input
-                  type="text"
-                  value={editUser.task}
-                  onChange={(e) => setEditUser({ ...editUser, task: e.target.value })}
-                  className="w-full px-2 py-1 border rounded-md"
-                />
-              ) : (
-                <span className="text-gray-700">{user.task}</span>
-              )}
-
-              <div className="flex items-center space-x-2">
-                {editUser?.id === user.id ? (
-                  <button
-                    onClick={updateUser}
-                    className="bg-green-500 text-white ml-3 px-2 py-1 rounded-md hover:bg-green-600"
+      {/* Display list of items */}
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Name</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {items.map((item) => (
+              <TableRow key={item.id}>
+                <TableCell>{item.name}</TableCell>
+                <TableCell>{item.email}</TableCell>
+                <TableCell>
+                  <IconButton color="primary" onClick={() => handleEdit(item)}>
+                    <EditIcon />
+                  </IconButton>
+                  <IconButton
+                    color="secondary"
+                    onClick={() => handleDelete(item.id)}
                   >
-                    Update
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setEditUser(user)}
-                    className="bg-yellow-500 text-white px-4 py-2 rounded-md hover:bg-yellow-600"
-                  >
-                    <MdOutlineEdit />
-                  </button>
-                )}
-
-                <button
-                  onClick={() => deleteUser(user.id)}
-                  className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
-                >
-                  <RiDeleteBinLine />
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+                    <DeleteIcon />
+                  </IconButton>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </div>
   );
-}
+};
 
 export default App;
