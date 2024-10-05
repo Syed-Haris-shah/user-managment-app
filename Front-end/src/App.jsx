@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 
-const URL = "http://user-managment-app-eight.vercel.app/users"
+const URL = "http://user-mangament-app-vercel-deployment.vercel.app/users"
 
 const App = () => {
   const [items, setItems] = useState([]);
